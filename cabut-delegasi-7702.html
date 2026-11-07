@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Cabut Delegasi 7702 — Base</title>
+    <style>
+      :root {
+        --bg: #f2f4f2;
+        --surface: #ffffff;
+        --surface-2: #e9edea;
+        --ink: #131a16;
+        --muted: #57615a;
+        --line: #cfd6d0;
+        --accent: #0a5c3f;
+        --accent-ink: #ffffff;
+        --danger: #a31d12;
+        --danger-bg: #fdecea;
+        --danger-line: #e5a49d;
+        --warn-bg: #fdf3d7;
+        --warn-line: #d9b94a;
+        --warn-ink: #5c4705;
+        --ok: #146c2e;
+        --ok-bg: #e6f4e9;
+        --ok-line: #9cc7a7;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d100e;
+          --surface: #161b18;
+          --surface-2: #1e2420;
+          --ink: #e9efeb;
+          --muted: #9aa79e;
+          --line: #2c352f;
+          --accent: #2fbf8f;
+          --accent-ink: #06231a;
+          --danger: #ff9d94;
+          --danger-bg: #3a1712;
+          --danger-line: #7a352c;
+          --warn-bg: #38300f;
+          --warn-line: #8a7422;
+          --warn-ink: #f0d98c;
+          --ok: #7fd598;
+          --ok-bg: #14301d;
+          --ok-line: #2f5c3c;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 660px;
+        margin: 0 auto;
+        padding: 20px 16px 48px;
+      }
+      h1 {
+        font-size: 26px;
+        line-height: 1.2;
+        margin: 4px 0 8px;
+        letter-spacing: -0.01em;
+      }
+      .lede { color: var(--muted); margin: 0 0 20px; font-size: 15.5px; }
+      .lede strong { color: var(--ink); }
+
+      .zero-banner {
+        background: var(--surface);
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        padding: 18px 18px 16px;
+        margin-bottom: 22px;
+      }
+      .zero-banner .kicker {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0 0 6px;
+      }
+      .zero-addr {
+        font-family: var(--mono);
+        font-size: clamp(17px, 4.6vw, 23px);
+        font-weight: 700;
+        word-break: break-all;
+        line-height: 1.35;
+        margin: 0 0 10px;
+      }
+      .zero-banner p { margin: 0 0 8px; font-size: 15.5px; }
+      .zero-banner p:last-child { margin-bottom: 0; }
+      .zero-banner .big { font-size: 18px; font-weight: 700; }
+
+      section.step {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 16px;
+      }
+      .step-head {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .step-num {
+        flex: 0 0 auto;
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--bg);
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(3px);
+      }
+      .step-head h2 { font-size: 18px; margin: 0; }
+      .step p { margin: 0 0 10px; }
+      .step p:last-child { margin-bottom: 0; }
+      .hint { color: var(--muted); font-size: 14px; }
+
+      .mono { font-family: var(--mono); word-break: break-all; }
+      .addr-box {
+        font-family: var(--mono);
+        font-size: 14.5px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        word-break: break-all;
+        margin: 8px 0;
+      }
+      .addr-box .label {
+        display: block;
+        font-family: var(--sans);
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      button {
+        font-family: var(--sans);
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 9px;
+        border: 1px solid transparent;
+        padding: 13px 18px;
+        cursor: pointer;
+        width: 100%;
+        touch-action: manipulation;
+      }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .btn-primary { background: var(--accent); color: var(--accent-ink); }
+      .btn-dark { background: var(--ink); color: var(--bg); }
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--line);
+        font-weight: 600;
+      }
+      .btn-small { width: auto; padding: 9px 14px; font-size: 14.5px; }
+      .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .btn-row button { flex: 1 1 auto; }
+
+      .alert {
+        border-radius: 9px;
+        padding: 13px 14px;
+        margin: 12px 0;
+        font-size: 15px;
+        display: none;
+      }
+      .alert.show { display: block; }
+      .alert-danger {
+        background: var(--danger-bg);
+        border: 1.5px solid var(--danger-line);
+        color: var(--danger);
+      }
+      .alert-warn {
+        background: var(--warn-bg);
+        border: 1.5px solid var(--warn-line);
+        color: var(--warn-ink);
+      }
+      .alert-ok {
+        background: var(--ok-bg);
+        border: 1.5px solid var(--ok-line);
+        color: var(--ok);
+      }
+      .alert .t { font-weight: 800; display: block; margin-bottom: 2px; }
+
+      .kv {
+        display: flex; justify-content: space-between; align-items: baseline;
+        gap: 12px; padding: 8px 0;
+        border-top: 1px dashed var(--line);
+        font-size: 15px;
+      }
+      .kv:first-of-type { border-top: none; }
+      .kv .k { color: var(--muted); }
+      .kv .v { font-family: var(--mono); font-weight: 700; text-align: right; word-break: break-all; }
+      .nonce-big { font-size: 30px !important; line-height: 1.1; }
+
+      .sign-summary {
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 14.5px;
+      }
+      .sign-summary .row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+      .sign-summary .k { color: var(--muted); flex: 0 0 auto; }
+      .sign-summary .v { font-family: var(--mono); font-weight: 700; text-align: right; word-break: break-all; }
+
+      textarea {
+        width: 100%;
+        min-height: 210px;
+        font-family: var(--mono);
+        font-size: 13.5px;
+        line-height: 1.5;
+        padding: 12px;
+        border: 1.5px solid var(--line);
+        border-radius: 9px;
+        background: var(--surface-2);
+        color: var(--ink);
+        resize: vertical;
+        word-break: break-all;
+      }
+      .err-text {
+        font-family: var(--mono);
+        font-size: 13px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        background: var(--surface);
+        border: 1px solid var(--danger-line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin: 10px 0;
+        max-height: 220px;
+        overflow: auto;
+      }
+      #resultSection, #errorSection { display: none; }
+      #resultSection.show, #errorSection.show { display: block; }
+
+      footer {
+        color: var(--muted);
+        font-size: 13.5px;
+        text-align: center;
+        margin-top: 26px;
+        line-height: 1.6;
+      }
+      .status-line { font-size: 14.5px; color: var(--muted); margin-top: 10px; min-height: 1.4em; }
+      .status-line.err { color: var(--danger); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Cabut Delegasi EIP-7702 — Base</h1>
+      <p class="lede">
+        Halaman ini khusus untuk jaringan <strong>Base</strong>. Ia hanya meminta
+        <strong>tanda tangan otorisasi pencabutan delegasi</strong> untuk akun di bawah ini.
+        Buka halaman ini dari <strong>browser DApp di dalam Bitget Wallet</strong>
+        dengan akun tersebut aktif. Pencabutan di BSC dan Ethereum menyusul terpisah setelah Base selesai.
+      </p>
+
+      <div class="addr-box">
+        <span class="label">Akun yang delegasinya dicabut</span>
+        <span id="targetAddr">0xda37a0472507651f4eddf97d5580733b704a7c36</span>
+      </div>
+
+      <div class="zero-banner" role="note">
+        <p class="kicker">Alamat tujuan otorisasi</p>
+        <p class="zero-addr">0x0000000000000000000000000000000000000000</p>
+        <p class="big">Alamat NOL = delegasi dicabut sepenuhnya.</p>
+        <p>
+          Yang kamu tanda tangani hanyalah selembar otorisasi yang menunjuk ke alamat nol di atas.
+          Ini <strong>bukan transfer dana</strong>, <strong>bukan transaksi</strong>, dan
+          <strong>tidak memotong saldo atau biaya apa pun</strong> dari wallet kamu.
+          Hasil tanda tangannya nanti diajukan oleh pihak lain yang menanggung biaya gas-nya.
+        </p>
+      </div>
+
+      <div class="alert alert-danger" id="noProviderAlert">
+        <span class="t">Wallet tidak terdeteksi</span>
+        Halaman ini tidak menemukan provider wallet (<span class="mono">window.ethereum</span>).
+        Buka halaman ini dari browser DApp di dalam aplikasi Bitget Wallet, bukan dari browser biasa.
+      </div>
+
+      <!-- LANGKAH 1 -->
+      <section class="step" aria-labelledby="h-connect">
+        <div class="step-head"><span class="step-num">1</span><h2 id="h-connect">Hubungkan wallet</h2></div>
+        <button class="btn-primary" id="connectBtn" type="button">Hubungkan Wallet</button>
+        <div class="addr-box" id="connectedBox" hidden>
+          <span class="label">Alamat yang terhubung</span>
+          <span id="connectedAddr">—</span>
+        </div>
+        <div class="alert alert-ok" id="matchAlert">
+          <span class="t">Alamat cocok</span>
+          Alamat yang terhubung sama dengan akun yang delegasinya akan dicabut.
+        </div>
+        <div class="alert alert-danger" id="mismatchAlert">
+          <span class="t">⚠ Alamat tidak cocok — jangan lanjutkan</span>
+          Alamat yang terhubung <strong>bukan</strong> <span class="mono">0xda37a0472507651f4eddf97d5580733b704a7c36</span>.
+          Ganti akun di Bitget Wallet ke akun tersebut, lalu hubungkan ulang.
+          Tanda tangan dari akun lain tidak berguna untuk pencabutan ini.
+        </div>
+        <p class="status-line" id="connectStatus"></p>
+      </section>
+
+      <!-- LANGKAH 2 -->
+      <section class="step" aria-labelledby="h-chain">
+        <div class="step-head"><span class="step-num">2</span><h2 id="h-chain">Jaringan Base</h2></div>
+        <p class="hint" style="margin-top:0">
+          Halaman ini hanya bekerja di jaringan <strong>Base (chainId 8453)</strong> — tidak ada pilihan jaringan lain.
+          Pastikan wallet berada di Base, lalu periksa nonce-nya.
+        </p>
+        <div class="addr-box">
+          <span class="label">Jaringan halaman ini</span>
+          <span>Base — chainId 8453</span>
+        </div>
+
+        <div class="kv">
+          <span class="k">Jaringan wallet saat ini</span>
+          <span class="v" id="walletChainVal">—</span>
+        </div>
+        <div class="alert alert-warn" id="chainMismatchAlert">
+          <span class="t">Wallet belum berada di jaringan Base</span>
+          Tekan tombol di bawah untuk berpindah ke Base lewat wallet kamu.
+        </div>
+        <div style="margin:12px 0">
+          <button class="btn-dark" id="switchBtn" type="button">Ganti ke Base</button>
+        </div>
+
+        <div class="kv">
+          <span class="k">Nonce akun di Base</span>
+          <span class="v nonce-big" id="nonceVal">—</span>
+        </div>
+        <p class="hint">
+          Nonce dibaca langsung dari jaringan Base lewat <span class="mono">eth_getTransactionCount</span>.
+          Nilai ini yang akan masuk ke otorisasi. Bila nonce berubah setelah kamu membaca halaman ini,
+          muat ulang sebelum menandatangani — tanda tangan dengan nonce lama tidak bisa dipakai.
+        </p>
+        <div class="btn-row">
+          <button class="btn-ghost" id="nonceBtn" type="button">Muat Ulang Nonce</button>
+        </div>
+        <p class="status-line" id="chainStatus"></p>
+      </section>
+
+      <!-- LANGKAH 3 -->
+      <section class="step" aria-labelledby="h-sign">
+        <div class="step-head"><span class="step-num">3</span><h2 id="h-sign">Tanda tangani otorisasi cabut</h2></div>
+        <p>Periksa ringkasan ini baik-baik sebelum menekan tombol tanda tangan:</p>
+        <div class="sign-summary">
+          <div class="row"><span class="k">Jenis</span><span class="v">Otorisasi EIP-7702 (tanda tangan saja)</span></div>
+          <div class="row"><span class="k">Alamat tujuan</span><span class="v">0x0000000000000000000000000000000000000000</span></div>
+          <div class="row"><span class="k">Artinya</span><span class="v">Delegasi dicabut</span></div>
+          <div class="row"><span class="k">Jaringan</span><span class="v">Base (chainId 8453)</span></div>
+          <div class="row"><span class="k">Nonce</span><span class="v" id="sumNonce">—</span></div>
+          <div class="row"><span class="k">Biaya dari wallet kamu</span><span class="v">Rp0 — tidak ada</span></div>
+        </div>
+        <button class="btn-primary" id="signBtn" type="button" style="font-size:18px; padding:16px 18px">
+          Tanda Tangani Otorisasi Cabut
+        </button>
+        <p class="status-line" id="signStatus"></p>
+      </section>
+
+      <!-- HASIL -->
+      <section class="step" id="resultSection" aria-labelledby="h-result">
+        <div class="step-head"><span class="step-num">4</span><h2 id="h-result">Hasil tanda tangan</h2></div>
+        <div class="alert alert-ok show">
+          <span class="t">Berhasil ditandatangani</span>
+          Salin seluruh isi kotak di bawah ini dan kirimkan kepada pihak yang akan mengajukannya.
+          Isi tanda tangan ini secara kriptografis hanya bisa dipakai untuk mencabut delegasi akunmu —
+          tidak bisa dipakai memindahkan dana.
+        </div>
+        <textarea id="resultText" readonly aria-label="Hasil tanda tangan otorisasi"></textarea>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn-dark" id="copyResultBtn" type="button">Salin Hasil Tanda Tangan</button>
+        </div>
+        <p class="status-line" id="copyStatus"></p>
+      </section>
+
+      <!-- ERROR -->
+      <section class="step" id="errorSection" aria-labelledby="h-error">
+        <div class="step-head"><span class="step-num">!</span><h2 id="h-error">Tanda tangan gagal</h2></div>
+        <p>
+          Kedua metode tanda tangan otorisasi (<span class="mono">wallet_signAuthorization</span> dan
+          <span class="mono">eth_signAuthorization</span>) tidak berhasil. Salin pesan error di bawah ini
+          dan kirimkan agar bisa diperiksa.
+        </p>
+        <div class="err-text" id="errorText"></div>
+        <div class="btn-row">
+          <button class="btn-ghost" id="copyErrorBtn" type="button">Salin Pesan Error</button>
+        </div>
+        <p class="status-line" id="copyErrorStatus"></p>
+      </section>
+
+      <footer>
+        Halaman ini hanya meminta tanda tangan otorisasi lewat wallet kamu.<br />
+        Ia tidak mengirim transaksi, tidak menyimpan data, dan tidak memuat pelacak apa pun.
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var TARGET = "0xda37a0472507651f4eddf97d5580733b704a7c36";
+        var ZERO = "0x0000000000000000000000000000000000000000";
+        // Halaman ini khusus Base.
+        var BASE_ID = 8453;
+        var BASE_HEX = "0x2105";
+        var BASE_PARAMS = {
+          chainId: BASE_HEX,
+          chainName: "Base",
+          nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+          rpcUrls: ["https://mainnet.base.org"],
+          blockExplorerUrls: ["https://basescan.org"]
+        };
+
+        var provider = window.ethereum || null;
+        var account = null;
+        var walletChainId = null; // number or null
+        var nonce = null; // number or null
+
+        function $(id) { return document.getElementById(id); }
+        function toHex(n) { return "0x" + Number(n).toString(16); }
+        function sameAddr(a, b) {
+          return !!a && !!b && String(a).toLowerCase() === String(b).toLowerCase();
+        }
+        function errToText(e) {
+          if (!e) return "Error tidak dikenal";
+          var parts = [];
+          if (e.code !== undefined) parts.push("code: " + e.code);
+          if (e.message) parts.push("message: " + e.message);
+          if (e.data) {
+            try { parts.push("data: " + (typeof e.data === "string" ? e.data : JSON.stringify(e.data))); }
+            catch (_) { /* abaikan */ }
+          }
+          if (!parts.length) {
+            try { return String(e); } catch (_) { return "Error tidak dikenal"; }
+          }
+          return parts.join("\n");
+        }
+
+        var connectBtn = $("connectBtn"), connectedBox = $("connectedBox"),
+            connectedAddr = $("connectedAddr"), matchAlert = $("matchAlert"),
+            mismatchAlert = $("mismatchAlert"), connectStatus = $("connectStatus"),
+            walletChainVal = $("walletChainVal"), chainMismatchAlert = $("chainMismatchAlert"),
+            switchBtn = $("switchBtn"), nonceVal = $("nonceVal"),
+            chainStatus = $("chainStatus"),
+            sumNonce = $("sumNonce"), signBtn = $("signBtn"),
+            signStatus = $("signStatus"), resultSection = $("resultSection"),
+            resultText = $("resultText"), errorSection = $("errorSection"),
+            errorText = $("errorText");
+
+        function setStatus(el, text, isErr) {
+          el.textContent = text || "";
+          el.className = "status-line" + (isErr ? " err" : "");
+        }
+
+        function render() {
+          // Alamat terhubung
+          if (account) {
+            connectedBox.hidden = false;
+            connectedAddr.textContent = account;
+            var match = sameAddr(account, TARGET);
+            matchAlert.classList.toggle("show", match);
+            mismatchAlert.classList.toggle("show", !match);
+            connectBtn.textContent = "Hubungkan Ulang";
+          } else {
+            connectedBox.hidden = true;
+            matchAlert.classList.remove("show");
+            mismatchAlert.classList.remove("show");
+            connectBtn.textContent = "Hubungkan Wallet";
+          }
+
+          // Jaringan wallet
+          if (walletChainId === null || walletChainId === undefined) {
+            walletChainVal.textContent = "—";
+          } else if (walletChainId === BASE_ID) {
+            walletChainVal.textContent = "Base (" + BASE_ID + ")";
+          } else {
+            walletChainVal.textContent = "Chain ID " + walletChainId + " (bukan Base)";
+          }
+
+          var chainOk = walletChainId === BASE_ID;
+          chainMismatchAlert.classList.toggle("show", !!account && !chainOk);
+          switchBtn.disabled = !provider || !account || chainOk;
+          switchBtn.textContent = chainOk
+            ? "Sudah di Jaringan Base"
+            : "Ganti ke Base";
+
+          // Nonce
+          nonceVal.textContent = (nonce === null || !chainOk) ? "—" : String(nonce);
+          sumNonce.textContent = (nonce === null || !chainOk) ? "—" : String(nonce);
+
+          // Kesiapan tanda tangan
+          var ready = !!provider && !!account && sameAddr(account, TARGET) && chainOk && nonce !== null;
+          signBtn.disabled = !ready;
+        }
+
+        function showError(text) {
+          errorText.textContent = text;
+          errorSection.classList.add("show");
+          errorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        function hideError() { errorSection.classList.remove("show"); }
+
+        function refreshWalletChain() {
+          if (!provider) return Promise.resolve();
+          return provider.request({ method: "eth_chainId" })
+            .then(function (hex) {
+              walletChainId = parseInt(hex, 16);
+              render();
+            })
+            .catch(function () { /* abaikan */ });
+        }
+
+        function fetchNonce() {
+          if (!provider || !account) {
+            setStatus(chainStatus, "Hubungkan wallet terlebih dahulu.", true);
+            return Promise.resolve();
+          }
+          if (walletChainId !== BASE_ID) {
+            nonce = null;
+            render();
+            setStatus(chainStatus, "Wallet belum berada di jaringan Base. Ganti ke Base dulu, lalu muat ulang nonce.", true);
+            return Promise.resolve();
+          }
+          setStatus(chainStatus, "Mengambil nonce dari jaringan Base…", false);
+          return provider.request({
+            method: "eth_getTransactionCount",
+            params: [account, "latest"]
+          }).then(function (hex) {
+            nonce = parseInt(hex, 16);
+            render();
+            setStatus(chainStatus, "Nonce terbaca dari jaringan Base.", false);
+          }).catch(function (e) {
+            nonce = null;
+            render();
+            setStatus(chainStatus, "Gagal mengambil nonce: " + errToText(e), true);
+          });
+        }
+
+        function afterConnect() {
+          render();
+          return refreshWalletChain().then(fetchNonce);
+        }
+
+        connectBtn.addEventListener("click", function () {
+          if (!provider) {
+            setStatus(connectStatus, "Provider wallet tidak ditemukan. Buka halaman ini dari browser DApp Bitget Wallet.", true);
+            return;
+          }
+          setStatus(connectStatus, "Meminta izin koneksi ke wallet…", false);
+          provider.request({ method: "eth_requestAccounts" })
+            .then(function (accounts) {
+              if (accounts && accounts.length) {
+                account = accounts[0];
+                setStatus(connectStatus, sameAddr(account, TARGET)
+                  ? "Terhubung dengan akun yang benar."
+                  : "Terhubung, tetapi alamatnya BUKAN akun tujuan. Lihat peringatan di atas.", !sameAddr(account, TARGET));
+                return afterConnect();
+              }
+              setStatus(connectStatus, "Wallet tidak mengembalikan alamat apa pun.", true);
+            })
+            .catch(function (e) {
+              setStatus(connectStatus, "Koneksi ditolak atau gagal: " + errToText(e), true);
+            });
+        });
+
+        switchBtn.addEventListener("click", function () {
+          if (!provider) return;
+          setStatus(chainStatus, "Meminta wallet berpindah ke Base…", false);
+          provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: BASE_HEX }]
+          }).then(function () {
+            return refreshWalletChain().then(fetchNonce);
+          }).catch(function (e) {
+            if (e && e.code === 4902) {
+              // Base belum ada di wallet: tawarkan untuk menambahkannya.
+              return provider.request({
+                method: "wallet_addEthereumChain",
+                params: [BASE_PARAMS]
+              }).then(function () {
+                return refreshWalletChain().then(fetchNonce);
+              }).catch(function (e2) {
+                setStatus(chainStatus, "Gagal menambah jaringan Base: " + errToText(e2), true);
+              });
+            }
+            setStatus(chainStatus, "Gagal berpindah ke Base: " + errToText(e), true);
+          });
+        });
+
+        $("nonceBtn").addEventListener("click", function () { fetchNonce(); });
+
+        function normalizeResult(res) {
+          var signed = Array.isArray(res) ? res[0] : res;
+          if (!signed || typeof signed !== "object") {
+            throw new Error("Hasil tanda tangan tidak berbentuk objek yang dikenali: " + JSON.stringify(res));
+          }
+          function num(v) {
+            if (v === undefined || v === null) return null;
+            if (typeof v === "number") return v;
+            if (typeof v === "string") return v.indexOf("0x") === 0 ? parseInt(v, 16) : parseInt(v, 10);
+            return null;
+          }
+          var yParity = num(signed.yParity);
+          if (yParity === null && signed.v !== undefined) {
+            var v = num(signed.v);
+            yParity = v >= 27 ? v - 27 : v;
+          }
+          return {
+            chainId: num(signed.chainId) !== null ? num(signed.chainId) : BASE_ID,
+            address: signed.address || ZERO,
+            nonce: num(signed.nonce) !== null ? num(signed.nonce) : nonce,
+            yParity: yParity,
+            r: signed.r,
+            s: signed.s
+          };
+        }
+
+        signBtn.addEventListener("click", function () {
+          hideError();
+          resultSection.classList.remove("show");
+          if (!provider || !account) {
+            setStatus(signStatus, "Hubungkan wallet terlebih dahulu.", true);
+            return;
+          }
+          if (!sameAddr(account, TARGET)) {
+            setStatus(signStatus, "Alamat terhubung bukan akun tujuan. Ganti akun di wallet dulu.", true);
+            return;
+          }
+          if (walletChainId !== BASE_ID) {
+            setStatus(signStatus, "Wallet belum berada di jaringan Base.", true);
+            return;
+          }
+          if (nonce === null) {
+            setStatus(signStatus, "Nonce belum terbaca. Tekan \"Muat Ulang Nonce\" dulu.", true);
+            return;
+          }
+
+          var auth = {
+            chainId: BASE_HEX,
+            address: ZERO,
+            nonce: toHex(nonce)
+          };
+
+          signBtn.disabled = true;
+          setStatus(signStatus, "Meminta tanda tangan ke wallet… Periksa layar konfirmasi di Bitget Wallet: alamat tujuannya harus 0x000…0000.", false);
+
+          function onSuccess(res, methodName) {
+            var out;
+            try {
+              out = normalizeResult(res);
+            } catch (e) {
+              showError("Metode " + methodName + " mengembalikan hasil yang tidak dikenali.\n\nHasil mentah:\n" + JSON.stringify(res, null, 2));
+              setStatus(signStatus, "Tanda tangan diterima tetapi hasilnya tidak dikenali. Lihat kotak error di bawah.", true);
+              render();
+              return;
+            }
+            resultText.value = JSON.stringify(out, null, 2);
+            resultSection.classList.add("show");
+            setStatus(signStatus, "Berhasil. Salin hasil tanda tangan di bawah dan kirimkan.", false);
+            resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            render();
+          }
+
+          function onBothFailed(e1, e2) {
+            var text =
+              "Tanda tangan otorisasi EIP-7702 gagal di kedua metode.\n" +
+              "Akun: " + account + "\n" +
+              "Jaringan: Base (chainId " + BASE_ID + ")\n" +
+              "Nonce: " + nonce + "\n" +
+              "Alamat tujuan otorisasi: " + ZERO + "\n\n" +
+              "— wallet_signAuthorization —\n" + errToText(e1) + "\n\n" +
+              "— eth_signAuthorization —\n" + errToText(e2);
+            showError(text);
+            setStatus(signStatus, "Gagal. Pesan error lengkap ada di kotak di bawah — salin dan kirimkan.", true);
+            render();
+          }
+
+          provider.request({ method: "wallet_signAuthorization", params: [auth] })
+            .then(function (res) { onSuccess(res, "wallet_signAuthorization"); })
+            .catch(function (e1) {
+              if (e1 && e1.code === 4001) {
+                // Pengguna menolak di wallet — jangan memancing prompt kedua.
+                setStatus(signStatus, "Kamu menolak permintaan tanda tangan di wallet. Tekan tombol tanda tangan lagi bila ingin mencoba ulang.", true);
+                render();
+                return;
+              }
+              provider.request({ method: "eth_signAuthorization", params: [auth] })
+                .then(function (res) { onSuccess(res, "eth_signAuthorization"); })
+                .catch(function (e2) {
+                  if (e2 && e2.code === 4001) {
+                    setStatus(signStatus, "Kamu menolak permintaan tanda tangan di wallet. Tekan tombol tanda tangan lagi bila ingin mencoba ulang.", true);
+                    render();
+                    return;
+                  }
+                  onBothFailed(e1, e2);
+                });
+            });
+        });
+
+        function copyFrom(el, statusEl) {
+          function done(ok) {
+            setStatus(statusEl, ok ? "Tersalin ke clipboard." : "Gagal menyalin otomatis — tekan lama pada teks lalu salin manual.", !ok);
+          }
+          if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") {
+            el.focus();
+            el.select();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(el.value).then(function () { done(true); }, function () {
+                try { done(document.execCommand("copy")); } catch (_) { done(false); }
+              });
+            } else {
+              try { done(document.execCommand("copy")); } catch (_) { done(false); }
+            }
+          } else {
+            var text = el.textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+            } else { done(false); }
+          }
+        }
+
+        $("copyResultBtn").addEventListener("click", function () {
+          copyFrom(resultText, $("copyStatus"));
+        });
+        $("copyErrorBtn").addEventListener("click", function () {
+          // Salin isi err-text lewat textarea sementara agar persis sama.
+          var tmp = document.createElement("textarea");
+          tmp.value = errorText.textContent;
+          tmp.setAttribute("readonly", "");
+          tmp.style.position = "absolute";
+          tmp.style.left = "-9999px";
+          document.body.appendChild(tmp);
+          copyFrom(tmp, $("copyErrorStatus"));
+          document.body.removeChild(tmp);
+        });
+
+        // Listener perubahan akun / jaringan dari wallet
+        if (provider && typeof provider.on === "function") {
+          provider.on("accountsChanged", function (accounts) {
+            account = accounts && accounts.length ? accounts[0] : null;
+            nonce = null;
+            render();
+            if (account) { refreshWalletChain().then(fetchNonce); }
+          });
+          provider.on("chainChanged", function (hex) {
+            walletChainId = parseInt(hex, 16);
+            nonce = null;
+            render();
+            if (account) { fetchNonce(); }
+          });
+        }
+
+        // Keadaan awal
+        if (!provider) {
+          $("noProviderAlert").classList.add("show");
+          connectBtn.disabled = true;
+          signBtn.disabled = true;
+        } else {
+          // Cek diam-diam apakah wallet sudah terhubung dari sesi sebelumnya.
+          provider.request({ method: "eth_accounts" })
+            .then(function (accounts) {
+              if (accounts && accounts.length) {
+                account = accounts[0];
+                return afterConnect();
+              }
+              render();
+            })
+            .catch(function () { render(); });
+        }
+        render();
+      })();
+    </script>
+  </body>
+</html>
