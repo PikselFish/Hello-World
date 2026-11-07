@@ -397,8 +397,8 @@
       <section class="step" id="errorSection" aria-labelledby="h-error">
         <div class="step-head"><span class="step-num">!</span><h2 id="h-error">Tanda tangan gagal</h2></div>
         <p>
-          Kedua metode tanda tangan otorisasi (<span class="mono">wallet_signAuthorization</span> dan
-          <span class="mono">eth_signAuthorization</span>) tidak berhasil. Salin pesan error di bawah ini
+          Ketiga metode tanda tangan otorisasi (<span class="mono">wallet_signAuthorization</span>,
+          <span class="mono">eth_signAuthorization</span>, dan <span class="mono">eth_sign</span>) tidak berhasil. Salin pesan error di bawah ini
           dan kirimkan agar bisa diperiksa.
         </p>
         <div class="err-text" id="errorText"></div>
@@ -635,6 +635,50 @@
           };
         }
 
+
+        function keccak256Bytes(msg) {
+          var RC = [0x0000000000000001n,0x0000000000008082n,0x800000000000808an,0x8000000080008000n,0x000000000000808bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,0x000000000000008an,0x0000000000000088n,0x0000000080008009n,0x000000008000000an,0x000000008000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,0x8000000000008002n,0x8000000000000080n,0x000000000000800an,0x800000008000000an,0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n];
+          var R = [[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
+          var MASK = (1n<<64n)-1n;
+          function rot(x,n){ n=BigInt(n); return n===0n? x : (((x<<n)|(x>>(64n-n))) & MASK); }
+          function f(state){
+            for (var round=0; round<24; round++){
+              var C=[], D=[];
+              for (var x=0;x<5;x++) C[x]=state[x]^state[x+5]^state[x+10]^state[x+15]^state[x+20];
+              for (var x2=0;x2<5;x2++) D[x2]=C[(x2+4)%5]^rot(C[(x2+1)%5],1);
+              for (var y=0;y<5;y++) for (var x3=0;x3<5;x3++) state[x3+5*y]^=D[x3];
+              var B=new Array(25);
+              for (var x4=0;x4<5;x4++) for (var y4=0;y4<5;y4++) B[y4+5*((2*x4+3*y4)%5)]=rot(state[x4+5*y4], R[x4][y4]);
+              for (var y5=0;y5<5;y5++) for (var x5=0;x5<5;x5++) state[x5+5*y5]=B[x5+5*y5]^((~B[(x5+1)%5+5*y5])&B[(x5+2)%5+5*y5]);
+              state[0]^=RC[round];
+            }
+          }
+          var rate=136, state=new Array(25).fill(0n), padded=Array.from(msg);
+          padded.push(0x01);
+          while (padded.length % rate !== rate-1) padded.push(0);
+          padded.push(0x80);
+          for (var off=0; off<padded.length; off+=rate){
+            for (var i=0;i<rate;i++) state[Math.floor(i/8)] ^= BigInt(padded[off+i]) << BigInt(8*(i%8));
+            f(state);
+          }
+          var out=[];
+          for (var j=0;j<32;j++) out.push(Number((state[Math.floor(j/8)] >> BigInt(8*(j%8))) & 0xffn));
+          return out;
+        }
+
+        function intToBytes(n){ if (n===0) return []; var a=[]; while (n>0){ a.unshift(n%256); n=Math.floor(n/256); } return a; }
+        function rlpString(bytes){ if (bytes.length===1 && bytes[0]<0x80) return bytes.slice(); return [0x80+bytes.length].concat(bytes); }
+        function authDigestHex(){
+          var chainBytes = rlpString(intToBytes(BASE_ID));
+          var addrBytes = [0x94]; for (var i=0;i<20;i++) addrBytes.push(0);
+          var nonceBytes = rlpString(intToBytes(nonce));
+          var payload = chainBytes.concat(addrBytes, nonceBytes);
+          var list = [0xc0+payload.length].concat(payload);
+          var data = [0x05].concat(list);
+          var h = keccak256Bytes(data);
+          return "0x" + h.map(function(b){ return ("0"+b.toString(16)).slice(-2); }).join("");
+        }
+
         signBtn.addEventListener("click", function () {
           hideError();
           resultSection.classList.remove("show");
@@ -681,15 +725,17 @@
             render();
           }
 
-          function onBothFailed(e1, e2) {
+          function onAllFailed(e1, e2, e3, digest) {
             var text =
-              "Tanda tangan otorisasi EIP-7702 gagal di kedua metode.\n" +
+              "Tanda tangan otorisasi EIP-7702 gagal di ketiga metode.\n" +
               "Akun: " + account + "\n" +
               "Jaringan: Base (chainId " + BASE_ID + ")\n" +
               "Nonce: " + nonce + "\n" +
-              "Alamat tujuan otorisasi: " + ZERO + "\n\n" +
+              "Alamat tujuan otorisasi: " + ZERO + "\n" +
+              "Hash otorisasi (digest): " + digest + "\n\n" +
               "— wallet_signAuthorization —\n" + errToText(e1) + "\n\n" +
-              "— eth_signAuthorization —\n" + errToText(e2);
+              "— eth_signAuthorization —\n" + errToText(e2) + "\n\n" +
+              "— eth_sign —\n" + errToText(e3);
             showError(text);
             setStatus(signStatus, "Gagal. Pesan error lengkap ada di kotak di bawah — salin dan kirimkan.", true);
             render();
@@ -712,7 +758,43 @@
                     render();
                     return;
                   }
-                  onBothFailed(e1, e2);
+                  var digest = authDigestHex();
+                  setStatus(signStatus, "Dua metode khusus 7702 tidak didukung Bitget. Mencoba metode terakhir (eth_sign) atas hash otorisasi " + digest + " — bila Bitget menampilkan hash untuk ditandatangani, cocokkan awal dan akhir hash-nya dengan ini.", false);
+                  provider.request({ method: "eth_sign", params: [account, digest] })
+                    .then(function (sig) {
+                      try {
+                        var hex = String(sig).replace(/^0x/, "");
+                        if (hex.length !== 130) throw new Error("panjang tanda tangan tidak biasa: " + hex.length + " heks");
+                        var v = parseInt(hex.slice(128, 130), 16);
+                        var out = {
+                          chainId: BASE_ID,
+                          address: ZERO,
+                          nonce: nonce,
+                          yParity: v >= 27 ? v - 27 : v,
+                          r: "0x" + hex.slice(0, 64),
+                          s: "0x" + hex.slice(64, 128),
+                          method: "eth_sign",
+                          digest: digest
+                        };
+                        resultText.value = JSON.stringify(out, null, 2);
+                        resultSection.classList.add("show");
+                        setStatus(signStatus, "Berhasil. Salin hasil tanda tangan di bawah dan kirimkan.", false);
+                        resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                        render();
+                      } catch (eParse) {
+                        showError("eth_sign mengembalikan hasil yang tidak dikenali.\n\nHasil mentah:\n" + String(sig));
+                        setStatus(signStatus, "Tanda tangan diterima tetapi hasilnya tidak dikenali. Lihat kotak error di bawah.", true);
+                        render();
+                      }
+                    })
+                    .catch(function (e3) {
+                      if (e3 && e3.code === 4001) {
+                        setStatus(signStatus, "Kamu menolak permintaan tanda tangan di wallet. Tekan tombol tanda tangan lagi bila ingin mencoba ulang.", true);
+                        render();
+                        return;
+                      }
+                      onAllFailed(e1, e2, e3, digest);
+                    });
                 });
             });
         });
