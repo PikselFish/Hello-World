@@ -286,17 +286,18 @@
         <p class="zero-addr">0x0000000000000000000000000000000000000000</p>
         <p class="big">Alamat NOL = delegasi dicabut sepenuhnya.</p>
         <p>
-          Yang kamu tanda tangani hanyalah selembar otorisasi yang menunjuk ke alamat nol di atas.
-          Ini <strong>bukan transfer dana</strong>, <strong>bukan transaksi</strong>, dan
-          <strong>tidak memotong saldo atau biaya apa pun</strong> dari wallet kamu.
-          Hasil tanda tangannya nanti diajukan oleh pihak lain yang menanggung biaya gas-nya.
+          Ada dua cara mencabutnya dari halaman ini. Cara utama: <strong>satu transaksi pencabutan</strong>
+          dari akun kamu sendiri lewat Rabby — bukan transfer dana, nilainya 0, hanya membayar gas yang
+          sangat kecil (perlu saldo ETH Base sedikit). Cara cadangan: kamu cukup <strong>menanda tangani
+          otorisasi</strong> yang menunjuk ke alamat nol, tanpa transaksi dan tanpa biaya, lalu pihak lain
+          yang mengajukannya.
         </p>
       </div>
 
       <div class="alert alert-danger" id="noProviderAlert">
         <span class="t">Wallet tidak terdeteksi</span>
         Halaman ini tidak menemukan provider wallet (<span class="mono">window.ethereum</span>).
-        Buka halaman ini dari browser DApp di dalam aplikasi Bitget Wallet, bukan dari browser biasa.
+        Buka halaman ini dari browser DApp di dalam aplikasi Rabby Wallet, bukan dari browser biasa.
       </div>
 
       <!-- LANGKAH 1 -->
@@ -314,7 +315,7 @@
         <div class="alert alert-danger" id="mismatchAlert">
           <span class="t">⚠ Alamat tidak cocok — jangan lanjutkan</span>
           Alamat yang terhubung <strong>bukan</strong> <span class="mono">0xda37a0472507651f4eddf97d5580733b704a7c36</span>.
-          Ganti akun di Bitget Wallet ke akun tersebut, lalu hubungkan ulang.
+          Ganti akun di wallet ke akun tersebut, lalu hubungkan ulang.
           Tanda tangan dari akun lain tidak berguna untuk pencabutan ini.
         </div>
         <p class="status-line" id="connectStatus"></p>
@@ -361,17 +362,23 @@
 
       <!-- LANGKAH 3 -->
       <section class="step" aria-labelledby="h-sign">
-        <div class="step-head"><span class="step-num">3</span><h2 id="h-sign">Tanda tangani otorisasi cabut</h2></div>
+        <div class="step-head"><span class="step-num">3</span><h2 id="h-sign">Cabut delegasi</h2></div>
         <p>Periksa ringkasan ini baik-baik sebelum menekan tombol tanda tangan:</p>
         <div class="sign-summary">
-          <div class="row"><span class="k">Jenis</span><span class="v">Otorisasi EIP-7702 (tanda tangan saja)</span></div>
+          <div class="row"><span class="k">Jenis</span><span class="v">Pencabutan delegasi EIP-7702</span></div>
           <div class="row"><span class="k">Alamat tujuan</span><span class="v">0x0000000000000000000000000000000000000000</span></div>
           <div class="row"><span class="k">Artinya</span><span class="v">Delegasi dicabut</span></div>
           <div class="row"><span class="k">Jaringan</span><span class="v">Base (chainId 8453)</span></div>
           <div class="row"><span class="k">Nonce</span><span class="v" id="sumNonce">—</span></div>
-          <div class="row"><span class="k">Biaya dari wallet kamu</span><span class="v">Rp0 — tidak ada</span></div>
+          <div class="row"><span class="k">Biaya dari wallet kamu</span><span class="v">Transaksi langsung: gas sangat kecil (\u00b10,0000003 ETH). Tanda tangan saja: Rp0</span></div>
         </div>
-        <button class="btn-primary" id="signBtn" type="button" style="font-size:18px; padding:16px 18px">
+        <p style="margin-bottom:8px"><strong>Cara utama \u2014 transaksi langsung dari Rabby</strong> (butuh saldo ETH Base sedikit untuk gas):</p>
+        <button class="btn-primary" id="txBtn" type="button" style="font-size:18px; padding:16px 18px">
+          Cabut Langsung via Transaksi
+        </button>
+        <p class="status-line" id="txStatus"></p>
+        <p style="margin:18px 0 8px"><strong>Cara cadangan \u2014 tanda tangan saja</strong> (tanpa transaksi, tanpa biaya; diajukan pihak lain):</p>
+        <button class="btn-dark" id="signBtn" type="button" style="font-size:16px; padding:14px 18px">
           Tanda Tangani Otorisasi Cabut
         </button>
         <p class="status-line" id="signStatus"></p>
@@ -379,7 +386,7 @@
 
       <!-- HASIL -->
       <section class="step" id="resultSection" aria-labelledby="h-result">
-        <div class="step-head"><span class="step-num">4</span><h2 id="h-result">Hasil tanda tangan</h2></div>
+        <div class="step-head"><span class="step-num">4</span><h2 id="h-result">Hasil</h2></div>
         <div class="alert alert-ok show">
           <span class="t">Berhasil ditandatangani</span>
           Salin seluruh isi kotak di bawah ini dan kirimkan kepada pihak yang akan mengajukannya.
@@ -678,6 +685,46 @@
           var h = keccak256Bytes(data);
           return "0x" + h.map(function(b){ return ("0"+b.toString(16)).slice(-2); }).join("");
         }
+
+
+        $("txBtn").addEventListener("click", function () {
+          hideError();
+          resultSection.classList.remove("show");
+          var txStatus = $("txStatus");
+          var txBtn = $("txBtn");
+          if (!provider || !account) { setStatus(txStatus, "Hubungkan wallet terlebih dahulu.", true); return; }
+          if (!sameAddr(account, TARGET)) { setStatus(txStatus, "Alamat terhubung bukan akun tujuan. Ganti akun di wallet dulu.", true); return; }
+          if (walletChainId !== BASE_ID) { setStatus(txStatus, "Wallet belum berada di jaringan Base.", true); return; }
+          if (nonce === null) { setStatus(txStatus, "Nonce belum terbaca. Tekan \"Muat Ulang Nonce\" dulu.", true); return; }
+          var authEntry = { chainId: BASE_HEX, address: ZERO, nonce: toHex(nonce) };
+          var baseTx = { from: account, to: account, value: "0x0", authorizationList: [authEntry] };
+          txBtn.disabled = true;
+          setStatus(txStatus, "Meminta Rabby mengirim transaksi pencabutan\u2026 Periksa layar konfirmasi: alamat tujuan otorisasi harus 0x000\u20260000, nilai 0 ETH, yang dibayar hanya gas kecil dari saldo kamu.", false);
+          function onTxSuccess(hash) {
+            txBtn.disabled = false;
+            resultText.value = JSON.stringify({ method: "eth_sendTransaction_type4", txHash: hash, chainId: BASE_ID, nonce: nonce, address: ZERO }, null, 2);
+            resultSection.classList.add("show");
+            setStatus(txStatus, "Transaksi terkirim: " + hash + " \u2014 kirimkan hasil di bawah untuk diverifikasi.", false);
+            resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            render();
+          }
+          function onTxFailed(e) {
+            txBtn.disabled = false;
+            if (e && e.code === 4001) { setStatus(txStatus, "Kamu menolak transaksi di wallet. Tekan tombolnya lagi bila ingin mencoba ulang.", true); render(); return; }
+            showError("Transaksi pencabutan langsung (eth_sendTransaction type-4) gagal.\nAkun: " + account + "\nJaringan: Base (chainId " + BASE_ID + ")\nNonce: " + nonce + "\n\n" + errToText(e));
+            setStatus(txStatus, "Gagal. Pesan error lengkap ada di kotak di bawah \u2014 salin dan kirimkan. Bila errornya soal saldo (insufficient funds), berarti ETH untuk gas belum masuk.", true);
+            render();
+          }
+          var withType = { type: "0x4", from: baseTx.from, to: baseTx.to, value: baseTx.value, authorizationList: baseTx.authorizationList };
+          provider.request({ method: "eth_sendTransaction", params: [withType] })
+            .then(onTxSuccess)
+            .catch(function (e1) {
+              if (e1 && e1.code === 4001) { onTxFailed(e1); return; }
+              provider.request({ method: "eth_sendTransaction", params: [baseTx] })
+                .then(onTxSuccess)
+                .catch(function (e2) { onTxFailed(e2); });
+            });
+        });
 
         signBtn.addEventListener("click", function () {
           hideError();
