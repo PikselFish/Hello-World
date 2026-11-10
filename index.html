@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NOBULLSHIT — Presale</title>
+<meta name="description" content="Share-model token presale for Agent ID holders on BNB Smart Chain. Claim a free share, buy shares, collect tokens after the pool opens." />
+<meta name="theme-color" content="#0a0a0a" />
+<meta property="og:title" content="NOBULLSHIT — Presale" />
+<meta property="og:description" content="Share-model token presale. Pool opens at share 10,000." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://nobulshit.xyz/" />
+<link rel="canonical" href="https://nobulshit.xyz/" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23ffd60a' stroke-width='6'/%3E%3Cpath d='M18 46 L46 18' stroke='%23ffd60a' stroke-width='6'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+  :root{
+    --accent:#ffd60a; --accent2:#ffd60a;
+    --bg:#0a0a0a; --panel:#101010; --panel-solid:#111111;
+    --line:#2b2b2b; --line-strong:#454545;
+    --text:#f2f2f2; --muted:#a3a3a3; --muted2:#6e6e6e;
+    --ok:#3ecf8e; --warn:#ffd60a; --err:#ff5c5c;
+    --font-d:"Space Grotesk",system-ui,sans-serif; --font-b:"Inter",system-ui,sans-serif; --font-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg); color:var(--text); font-family:var(--font-b); line-height:1.6; overflow-x:hidden}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:var(--accent); color:#000}
+  .wrap{max-width:1140px; margin:0 auto; padding:0 20px 84px}
+  h1,h2,h3,.disp{font-family:var(--font-d)}
+  /* ---------- header ---------- */
+  header.site{position:sticky; top:0; z-index:50; background:rgba(10,10,10,.92); border-bottom:2px solid var(--line-strong)}
+  .header-in{max-width:1140px; margin:0 auto; padding:13px 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; row-gap:10px}
+  #connectBtn{flex:none; white-space:nowrap}
+  @media (max-width:560px){
+    .header-in{padding:11px 14px; gap:10px}
+    .brand svg{width:32px; height:32px}
+    .brand b{font-size:16px}
+    #connectBtn{padding:9px 13px; font-size:13.5px}
+    .lang-switch button{padding:8px 10px; font-size:12px}
+    #xLink{display:none !important}
+  }
+  .brand{display:flex; align-items:center; gap:12px; margin-right:auto}
+  .brand svg{width:40px; height:40px; flex:none}
+  .brand .bt{line-height:1.15}
+  .brand b{font-family:var(--font-d); font-size:19px; letter-spacing:1.5px}
+  .brand small{display:block; color:var(--muted); font-size:11.5px}
+  nav.main{display:flex; gap:22px}
+  nav.main a{color:var(--muted); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:1px}
+  nav.main a:hover{color:var(--text); text-decoration:none}
+  @media (max-width:1080px){ nav.main{display:none} }
+  button{font:inherit; cursor:pointer; border:2px solid #000; border-radius:6px; padding:11px 20px; font-weight:700; transition:transform .1s, box-shadow .1s, background .1s}
+  button:active{transform:translate(2px,2px); box-shadow:none !important}
+  .btn-accent{background:var(--accent); color:#000; box-shadow:4px 4px 0 #000}
+  .btn-accent:hover:not(:disabled){box-shadow:5px 5px 0 #000}
+  .btn-accent:disabled{background:#262626; color:#6e6e6e; border-color:#262626; box-shadow:none; cursor:not-allowed}
+  .btn-ghost{background:#161616; border-color:var(--line-strong); color:var(--text); box-shadow:4px 4px 0 #000}
+  .btn-ghost:hover:not(:disabled){background:#1e1e1e}
+  .btn-ghost:disabled{color:#6e6e6e; box-shadow:none; cursor:not-allowed}
+  .lang-switch{display:flex; border:2px solid var(--line-strong); border-radius:6px; overflow:hidden; flex:none}
+  .lang-switch button{border:none; box-shadow:none; padding:9px 13px; background:#161616; color:var(--muted); font-size:12.5px; font-weight:700; border-radius:0}
+  .lang-switch button:active{transform:none}
+  .lang-switch button.sel{background:var(--accent); color:#000}
+  .wallet-dot{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--ok); margin-right:8px}
+  .preview-banner{margin:22px 0 0; background:#1a1600; border:2px dashed var(--accent); color:var(--accent);
+    padding:11px 16px; border-radius:6px; font-size:14px; font-weight:600; display:none; align-items:center; gap:10px}
+  .preview-banner.on{display:flex}
+  /* ---------- hero + desk ---------- */
+  .hero{display:grid; grid-template-columns:1fr 430px; gap:34px; align-items:start; padding:50px 0 8px}
+  @media (max-width:960px){ .hero{grid-template-columns:1fr; padding-top:36px} }
+  .pill{display:inline-flex; align-items:center; gap:8px; border:2px solid var(--line-strong); background:#111;
+    padding:5px 13px; border-radius:6px; font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1.2px}
+  .pill .dot{width:8px; height:8px; border-radius:0; background:var(--warn)}
+  .pill.live .dot{background:var(--ok)}
+  .hero h1{font-size:clamp(44px, 6.2vw, 68px); line-height:1.0; letter-spacing:.5px; margin:22px 0 4px; text-transform:uppercase}
+  .hero h1 .grad{color:var(--accent)}
+  .hero .ticker-line{font-family:var(--font-m); color:var(--muted); font-size:17px; letter-spacing:3px}
+  .hero p.lead{color:var(--muted); max-width:520px; margin-top:18px; font-size:16.5px}
+  .stamps{display:flex; gap:10px; flex-wrap:wrap; margin-top:24px}
+  .stamp{border:2px solid var(--text); color:var(--text); padding:5px 12px; font-family:var(--font-d); font-weight:700; font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; border-radius:4px; transform:rotate(-1.2deg)}
+  .stamp.y{border-color:var(--accent); color:var(--accent); transform:rotate(1deg)}
+  .countdown{display:flex; gap:10px; margin:28px 0 4px; flex-wrap:wrap}
+  .cd{background:var(--panel); border:2px solid var(--line); border-radius:6px; min-width:72px; padding:10px 4px 8px; text-align:center}
+  .cd b{font-family:var(--font-m); font-size:24px; display:block; line-height:1.1}
+  .cd small{color:var(--muted2); font-size:10.5px; text-transform:uppercase; letter-spacing:1.6px}
+  .cd-label{color:var(--muted); font-size:13.5px; margin-top:8px}
+  .hero-stats{display:flex; gap:26px; margin-top:28px; flex-wrap:wrap}
+  .hero-stats .hs small{color:var(--muted2); display:block; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700}
+  .hero-stats .hs b{font-family:var(--font-m); font-size:19px}
+  /* desk presale */
+  .desk{background:var(--panel); border:2px solid var(--line-strong); border-radius:10px; padding:24px; box-shadow:8px 8px 0 #000; position:sticky; top:86px}
+  @media (max-width:960px){ .desk{position:static} }
+  .desk h2{font-size:19px; display:flex; align-items:center; justify-content:space-between; text-transform:uppercase; letter-spacing:.5px}
+  .desk h2 .live-tag{font-size:11px; font-family:var(--font-d); font-weight:700; letter-spacing:1.5px; color:#000; background:var(--warn); padding:4px 10px; border-radius:4px; transform:rotate(1.5deg)}
+  .desk h2 .live-tag.on{background:var(--ok)}
+  .desk .dsub{color:var(--muted); font-size:13px; margin-top:2px}
+  .progress{height:14px; background:#000; border:2px solid var(--line-strong); border-radius:4px; overflow:hidden; margin:16px 0 4px}
+  .progress i{display:block; height:100%; width:0%; background:var(--accent); transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .miles{position:relative; display:flex; justify-content:space-between; margin:10px 2px 2px}
+  .mile{text-align:center; flex:1}
+  .mile .mdot{width:12px; height:12px; border-radius:0; background:#1c1c1c; border:2px solid var(--line-strong); margin:0 auto 4px}
+  .mile.hit .mdot{background:var(--accent); border-color:var(--accent)}
+  .mile small{color:var(--muted2); font-size:10.5px; display:block; line-height:1.3; font-family:var(--font-m)}
+  .desk hr{border:none; border-top:2px dashed var(--line); margin:18px 0}
+  .free-row{display:flex; align-items:center; justify-content:space-between; gap:12px; background:#141414; border:2px solid var(--line-strong); border-radius:8px; padding:13px 15px}
+  .free-row b{font-size:14.5px} .free-row small{display:block; color:var(--muted); font-size:12px}
+  .chips{display:flex; gap:8px; margin:14px 0 4px; flex-wrap:wrap}
+  .chip{background:#161616; border:2px solid var(--line-strong); color:var(--text); padding:8px 15px; border-radius:6px; font-size:13.5px; font-weight:700; box-shadow:none}
+  .chip:active{transform:none}
+  .chip:hover{border-color:var(--accent)}
+  .chip.sel{background:var(--accent); border-color:var(--accent); color:#000}
+  .qtyrow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px}
+  .qty{display:flex; align-items:center; gap:6px; background:#141414; border:2px solid var(--line); border-radius:6px; padding:4px}
+  .qty button{width:34px; height:34px; padding:0; background:transparent; border:none; box-shadow:none; color:var(--text); font-size:19px}
+  .qty button:hover{background:#222}
+  .qty b{min-width:28px; text-align:center; font-family:var(--font-m); font-size:17px}
+  input[type=range]{width:100%; accent-color:var(--accent); margin-top:12px}
+  .breakdown{margin-top:12px; font-size:13.5px; color:var(--muted); font-family:var(--font-m)}
+  .breakdown div{display:flex; justify-content:space-between; padding:2.5px 0}
+  .breakdown b{color:var(--text); font-weight:600}
+  .desk .big-btn{width:100%; margin-top:16px; padding:14px; font-size:15.5px; text-transform:uppercase; letter-spacing:1px}
+  .status-line{font-size:13px; margin-top:11px; min-height:19px}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)} .muted{color:var(--muted)}
+  .collect-row{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .invite-out{display:flex; gap:8px; margin-top:10px}
+  .invite-out input{flex:1; min-width:0; background:#141414; border:2px solid var(--line); border-radius:6px; color:var(--text); padding:10px 12px; font:inherit; font-size:12.5px}
+  /* ---------- sections ---------- */
+  section.blk{margin-top:60px}
+  section.blk h2{font-size:26px; text-transform:uppercase; letter-spacing:.5px}
+  section.blk .sub{color:var(--muted); margin-top:4px; font-size:14.5px}
+  .steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(225px,1fr)); gap:14px; margin-top:20px}
+  .step{background:var(--panel); border:2px solid var(--line); border-radius:8px; padding:18px}
+  .step .n{font-family:var(--font-m); font-size:26px; color:var(--accent); font-weight:700}
+  .step b{display:block; margin-top:6px; font-size:15.5px}
+  .step p{color:var(--muted); font-size:13.5px; margin-top:3px}
+  .terms{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:20px}
+  .term{background:var(--panel); border:2px solid var(--line); border-radius:8px; padding:17px}
+  .term small{color:var(--muted2); text-transform:uppercase; letter-spacing:1.1px; font-size:11px; font-weight:700}
+  .term b{display:block; font-family:var(--font-m); font-size:18px; margin:4px 0 3px}
+  .term p{color:var(--muted); font-size:13px}
+  .missions{display:grid; grid-template-columns:repeat(auto-fit,minmax(235px,1fr)); gap:14px; margin-top:20px}
+  .mission{background:var(--panel); border:2px solid var(--line-strong); border-radius:8px; padding:18px}
+  .mission .pts{float:right; font-size:11.5px; font-weight:700; font-family:var(--font-m); color:#000; background:var(--accent); padding:3px 9px; border-radius:4px}
+  .mission b{font-size:15.5px}
+  .mission p{color:var(--muted); font-size:13.5px; margin-top:5px}
+  .tok{display:grid; grid-template-columns:300px 1fr; gap:28px; align-items:center; margin-top:22px; background:var(--panel); border:2px solid var(--line); border-radius:10px; padding:26px}
+  @media (max-width:760px){ .tok{grid-template-columns:1fr; justify-items:center} }
+  .tok-legend{width:100%}
+  .tok-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14.5px}
+  .tok-row:last-child{border-bottom:none}
+  .tok-row .sw{width:13px; height:13px; border-radius:3px; flex:none}
+  .tok-row b{margin-left:auto; font-family:var(--font-m)}
+  .addr{display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--panel); border:2px solid var(--line); border-radius:8px; padding:14px 18px; margin-top:10px; flex-wrap:wrap}
+  .addr small{color:var(--muted); display:block; font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:700}
+  .addr code{font-size:13.5px; word-break:break-all; font-family:var(--font-m)}
+  .addr .acts{display:flex; gap:8px}
+  .icon-btn{background:#161616; border:2px solid var(--line-strong); padding:8px 11px; border-radius:6px; font-size:12.5px; color:var(--text); box-shadow:none}
+  .faq-item{border:2px solid var(--line); border-radius:8px; margin-top:10px; background:var(--panel); overflow:hidden}
+  .faq-q{width:100%; text-align:left; background:none; border:none; box-shadow:none; color:var(--text); padding:16px 18px; font-weight:700; font-size:15px; display:flex; justify-content:space-between; align-items:center; border-radius:0}
+  .faq-q:active{transform:none}
+  .faq-q .chev{transition:transform .25s; color:var(--muted)}
+  .faq-item.open .faq-q .chev{transform:rotate(180deg)}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height .3s ease}
+  .faq-a p{padding:0 18px 16px; color:var(--muted); font-size:14px}
+  footer{margin-top:64px; border-top:2px solid var(--line); padding-top:20px; color:var(--muted2); font-size:13px; display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap}
+  #toasts{position:fixed; right:18px; bottom:18px; z-index:100; display:flex; flex-direction:column; gap:10px; max-width:min(360px, calc(100vw - 36px))}
+  .toast{background:#141414; border:2px solid var(--line-strong); border-left:6px solid var(--accent); border-radius:6px; padding:13px 16px; font-size:13.5px; box-shadow:6px 6px 0 #000; animation:tin .25s ease-out}
+  .toast.ok{border-left-color:var(--ok)} .toast.err{border-left-color:var(--err)}
+  @keyframes tin{from{transform:translateY(10px); opacity:0}}
+  .reveal{opacity:0; transform:translateY(12px); transition:opacity .45s, transform .45s}
+  .reveal.in{opacity:1; transform:none}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="header-in">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="21" fill="none" stroke="var(--accent)" stroke-width="5.5"/><path d="M17.5 46.5 L46.5 17.5" stroke="var(--accent)" stroke-width="5.5" stroke-linecap="round"/></svg>
+      <div class="bt"><b data-bind="name">NOBULLSHIT</b><small>Presale &middot; <span data-bind="chainName">BNB Smart Chain</span></small></div>
+    </div>
+    <nav class="main">
+      <a href="#desk" data-i18n="nav_presale">Presale</a><a href="#cara" data-i18n="nav_how">How It Works</a><a href="#ketentuan" data-i18n="nav_terms">Terms</a><a href="#misi" data-i18n="nav_missions">Missions</a><a href="#tokenomics" data-i18n="nav_tokenomics">Tokenomics</a><a href="#faq" data-i18n="nav_faq">FAQ</a>
+    </nav>
+    <a id="xLink" href="#" target="_blank" rel="noopener" style="font-size:14px; font-weight:500">X &#8599;</a>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button id="langEn" class="sel">EN</button><button id="langZh">中文</button>
+    </div>
+    <button class="btn-accent" id="connectBtn" data-i18n="connect">Connect Wallet</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="preview-banner" id="previewBanner"><span>&#9888;</span><span data-i18n="banner"></span></div>
+
+  <div class="hero">
+    <div>
+      <span class="pill" id="statusPill"><span class="dot"></span><span id="statusPillText" data-i18n="pill_preview">Preview</span></span>
+      <h1><span class="grad" data-bind="name">NOBULLSHIT</span></h1>
+      <div class="ticker-line" data-bind="ticker">$NOB</div>
+      <p class="lead" id="taglineEl"></p>
+      <p class="lead" id="descriptionEl" style="margin-top:10px; font-size:15px"></p>
+      <div class="stamps"><span class="stamp y" data-i18n="stamp1"></span><span class="stamp" data-i18n="stamp2"></span><span class="stamp" data-i18n="stamp3"></span></div>
+
+      <div class="countdown">
+        <div class="cd"><b id="cdD">–</b><small data-i18n="cd_d">Days</small></div>
+        <div class="cd"><b id="cdH">–</b><small data-i18n="cd_h">Hours</small></div>
+        <div class="cd"><b id="cdM">–</b><small data-i18n="cd_m">Minutes</small></div>
+        <div class="cd"><b id="cdS">–</b><small data-i18n="cd_s">Seconds</small></div>
+      </div>
+      <div class="cd-label" id="cdLabel"></div>
+
+      <div class="hero-stats">
+        <div class="hs"><small data-i18n="hs_free_left">Free shares left</small><b id="stFree">–</b></div>
+        <div class="hs"><small data-i18n="hs_price">Price / share</small><b id="stPrice">–</b></div>
+        <div class="hs"><small data-i18n="hs_mine">Your shares</small><b id="stMine">—</b></div>
+      </div>
+      <div class="muted" id="stMineSub" style="font-size:13px; margin-top:4px" data-i18n="hs_mine_sub"></div>
+    </div>
+
+    <div class="desk" id="desk">
+      <h2><span data-i18n="desk_title">Presale Desk</span> <span class="live-tag" id="deskTag">PREVIEW</span></h2>
+      <p class="dsub" id="deskSub"></p>
+      <div class="progress"><i id="progressBar"></i></div>
+      <div style="display:flex; justify-content:space-between; font-size:13px"><b id="stProgress">–</b><span class="muted" id="stProgressPct"></span></div>
+      <div class="miles" id="miles"></div>
+
+      <hr />
+      <div class="free-row">
+        <div><b data-i18n="free_row_title">Free Share — Agent ID</b><small id="freeState"></small></div>
+        <button class="btn-accent" id="claimBtn" disabled data-i18n="claim">Claim</button>
+      </div>
+      <div class="status-line" id="claimStatus"></div>
+
+      <hr />
+      <div style="font-weight:600; font-size:14.5px"><span data-i18n="buy_title">Buy Shares</span> <span class="muted" style="font-weight:400">— <span id="buyPer"></span></span></div>
+      <div class="chips" id="chips">
+        <button class="chip" data-q="1">1</button>
+        <button class="chip" data-q="5">5</button>
+        <button class="chip" data-q="10">10</button>
+        <button class="chip" data-q="max">Max</button>
+      </div>
+      <div class="qtyrow">
+        <div class="qty"><button id="qMinus" aria-label="Decrease">−</button><b id="qVal">1</b><button id="qPlus" aria-label="Increase">+</button></div>
+        <span class="muted" style="font-size:13px" id="maxPer"></span>
+      </div>
+      <input type="range" id="qRange" min="1" max="10" value="1" aria-label="Number of shares" />
+      <div class="breakdown">
+        <div><span data-i18n="bd_shares">Shares</span><b id="bdShares">1</b></div>
+        <div><span data-i18n="bd_tokens">Tokens received</span><b id="bdTokens">–</b></div>
+        <div><span data-i18n="bd_total">Total to pay</span><b id="bdTotal">–</b></div>
+      </div>
+      <button class="btn-accent big-btn" id="buyBtn" disabled data-i18n="buy_btn">Buy Shares</button>
+      <div class="status-line" id="buyStatus"></div>
+
+      <hr />
+      <div class="collect-row">
+        <div><b style="font-size:14.5px" data-i18n="collect_title">Collect Tokens</b><div class="muted" id="collectState" style="font-size:12.5px"></div></div>
+        <button class="btn-ghost" id="collectBtn" disabled data-i18n="collect_btn">Collect</button>
+      </div>
+      <div class="status-line" id="collectStatus"></div>
+
+      <div id="refundRow" style="display:none">
+        <hr />
+        <div class="collect-row">
+          <div><b style="font-size:14.5px" data-i18n="refund_title">Claim Refund</b><div class="muted" style="font-size:12.5px" data-i18n="refund_note"></div></div>
+          <button class="btn-ghost" id="refundBtn" disabled data-i18n="refund_btn">Refund</button>
+        </div>
+        <div class="status-line" id="refundStatus"></div>
+      </div>
+
+      <hr />
+      <div style="font-weight:600; font-size:14.5px" data-i18n="invite_title">Your Invite Link</div>
+      <p class="muted" style="font-size:12.5px" data-i18n="invite_desc"></p>
+      <div class="invite-out"><input id="inviteOut" readonly /><button class="btn-ghost" id="copyInvite" data-i18n="copy">Copy</button></div>
+      <div class="status-line muted" id="inviteNote"></div>
+    </div>
+  </div>
+
+  <section class="blk reveal" id="cara">
+    <h2 data-i18n="how_title">How It Works</h2>
+    <p class="sub" data-i18n="how_sub"></p>
+    <div class="steps">
+      <div class="step"><span class="n">01</span><b data-i18n="step1_t"></b><p id="step1p"></p></div>
+      <div class="step"><span class="n">02</span><b id="step2t"></b><p data-i18n="step2_p"></p></div>
+      <div class="step"><span class="n">03</span><b data-i18n="step3_t"></b><p id="step3p"></p></div>
+      <div class="step"><span class="n">04</span><b data-i18n="step4_t"></b><p id="step4p"></p></div>
+    </div>
+  </section>
+
+  <section class="blk reveal" id="ketentuan">
+    <h2 data-i18n="terms_title">Presale Terms</h2>
+    <p class="sub" data-i18n="terms_sub"></p>
+    <div class="terms" id="termList"></div>
+  </section>
+
+  <section class="blk reveal" id="misi">
+    <h2 data-i18n="missions_title">Missions Program</h2>
+    <p class="sub" data-i18n="missions_sub"></p>
+    <div class="missions" id="missionList"></div>
+  </section>
+
+  <section class="blk reveal" id="tokenomics">
+    <h2 data-i18n="tok_title">Tokenomics</h2>
+    <p class="sub" id="tokSub"></p>
+    <div class="tok">
+      <svg id="donut" width="230" height="230" viewBox="0 0 230 230" role="img" aria-label="Tokenomics chart"></svg>
+      <div class="tok-legend" id="tokLegend"></div>
+    </div>
+  </section>
+
+  <section class="blk reveal" id="kontrak">
+    <h2 data-i18n="addr_title">Contract Addresses</h2>
+    <p class="sub" data-i18n="addr_sub"></p>
+    <div id="addrList"></div>
+  </section>
+
+  <section class="blk reveal" id="faq">
+    <h2 data-i18n="faq_title">Frequently Asked Questions</h2>
+    <div id="faqList"></div>
+  </section>
+
+  <footer>
+    <span><b data-bind="name" style="color:var(--text)">NOBULLSHIT</b> &middot; <span data-i18n="footer_presale_on">Presale on</span> <span data-bind="chainName">BNB Smart Chain</span></span>
+    <span data-i18n="footer_right"></span>
+  </footer>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  const S = window.APP_SETTINGS, P = S.params, C = S.contracts, CH = S.chain;
+  const $ = (id)=>document.getElementById(id);
+  const LIVE = !!(C.token && C.sale);
+  let account = null, qty = 1;
+
+  /* ---------- language ---------- */
+  let LANG = "en";
+  try { const saved = localStorage.getItem("nob_lang"); if (saved === "zh" || saved === "en") LANG = saved; } catch(e){}
+  let T = S.i18n[LANG];
+  const LOCALE = ()=> LANG === "zh" ? "zh-CN" : "en-US";
+  const fmt = (n)=>Number(n).toLocaleString(LOCALE());
+  const fmtPct = (x)=>x.toLocaleString(LOCALE(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+  const F = (str, map)=>{ let out = String(str); Object.keys(map || {}).forEach(k=>{ out = out.split("{" + k + "}").join(map[k]); }); return out; };
+  const PH = ()=>({ n: fmt(P.openingShare), q: fmt(P.freeShares), soft: fmt(P.softCapShares), hard: fmt(P.openingShare),
+    s1: fmt(P.liquidityStages[0]), s2: fmt(P.liquidityStages[1]), s3: fmt(P.liquidityStages[2]), supply: fmt(S.totalSupply) });
+
+  function toast(msg, type){
+    const t = document.createElement("div");
+    t.className = "toast" + (type ? " " + type : "");
+    t.textContent = msg;
+    $("toasts").appendChild(t);
+    setTimeout(()=>{ t.style.opacity = "0"; t.style.transition = "opacity .4s"; setTimeout(()=>t.remove(), 420); }, 4600);
+  }
+
+  /* ---------- identity from config ---------- */
+  document.documentElement.style.setProperty("--accent", S.accent || "#ffd60a");
+  if (S.accent2) document.documentElement.style.setProperty("--accent2", S.accent2);
+  document.title = S.projectName + " — Presale";
+  const binds = { name: S.projectName, ticker: "$" + S.ticker, chainName: CH.name };
+  document.querySelectorAll("[data-bind]").forEach(el=>{
+    const k = el.getAttribute("data-bind"); if (binds[k] !== undefined) el.textContent = binds[k];
+  });
+  $("xLink").style.display = S.x ? "" : "none";
+  if (S.x) $("xLink").href = S.x;
+  $("qRange").max = P.maxPaidPerWallet;
+
+  const io = new IntersectionObserver(es=>es.forEach(e=>{ if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold:.08 });
+  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+
+  /* ---------- milestones ---------- */
+  const STAGES = (P.liquidityStages && P.liquidityStages.length) ? P.liquidityStages : [P.openingShare];
+  function renderMiles(){
+    $("miles").innerHTML = STAGES.map((s, i)=>
+      '<div class="mile" data-mile="'+(s / P.openingShare * 100)+'"><div class="mdot"></div><small>'+T.mile_stage+' '+(i+1)+'<br>'+fmt(s)+' '+T.mile_share+'</small></div>'
+    ).join("");
+  }
+  function setProgress(sold){
+    const pct = Math.min(100, sold / P.openingShare * 100);
+    $("progressBar").style.width = pct + "%";
+    $("stProgress").textContent = fmt(sold) + " / " + fmt(P.openingShare) + " " + T.mile_share;
+    $("stProgressPct").textContent = fmtPct(pct);
+    document.querySelectorAll(".mile").forEach(m=>{
+      m.classList.toggle("hit", pct >= Number(m.getAttribute("data-mile")));
+    });
+  }
+
+  /* ---------- terms ---------- */
+  function renderTerms(){
+    const terms = [
+      [T.term1_l, P.pricePerShareBNB + " BNB", T.term1_n],
+      [T.term2_l, fmt(P.tokensPerShare) + " " + S.ticker, T.term2_n],
+      [T.term3_l, fmt(P.freeTokenPerShare) + " " + S.ticker, F(T.term3_n, PH())],
+      [T.term4_l, STAGES.map(fmt).join(" · "), T.term4_n],
+      [T.term5_l, fmt(P.softCapShares) + " / " + fmt(P.openingShare), F(T.term5_n, PH())],
+      [T.term6_l, P.maxPaidPerWallet + "", T.term6_n],
+    ];
+    $("termList").innerHTML = terms.map(t=>
+      '<div class="term"><small>'+t[0]+'</small><b>'+t[1]+'</b><p>'+t[2]+'</p></div>'
+    ).join("");
+  }
+
+  /* ---------- missions ---------- */
+  function renderMissions(){
+    $("missionList").innerHTML = (T.missions || []).map(m=>
+      '<div class="mission"><span class="pts">'+m.pts+'</span><b>'+m.title+'</b><p>'+m.desc+'</p></div>'
+    ).join("");
+  }
+
+  /* ---------- tokenomics donut ---------- */
+  function renderTok(){
+    const items = S.tokenomics || [];
+    const total = items.reduce((a,b)=>a + (b.pct||0), 0) || 100;
+    const r = 84, circ = 2 * Math.PI * r, cx = 115;
+    let acc = 0, parts = "";
+    items.forEach(it=>{
+      const len = (it.pct / total) * circ;
+      parts += '<circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="'+it.color+'" stroke-width="26" ' +
+        'stroke-dasharray="'+Math.max(0, len - 3)+' '+circ+'" stroke-dashoffset="'+(-acc)+'" ' +
+        'transform="rotate(-90 '+cx+' '+cx+')"/>';
+      acc += len;
+    });
+    parts += '<text x="'+cx+'" y="'+(cx-4)+'" text-anchor="middle" fill="var(--text)" font-family="Space Grotesk" font-weight="700" font-size="24">$'+S.ticker+'</text>' +
+             '<text x="'+cx+'" y="'+(cx+20)+'" text-anchor="middle" fill="var(--muted)" font-size="12">'+T.tok_center+'</text>';
+    $("donut").innerHTML = parts;
+    $("tokLegend").innerHTML = items.map(it=>
+      '<div class="tok-row"><span class="sw" style="background:'+it.color+'"></span><span>'+T["tok_" + it.key]+'</span>' +
+      '<span style="margin-left:auto; text-align:right"><span class="muted" style="font-family:var(--font-m); font-size:12.5px">'+fmt(it.amount)+'</span> <b>'+it.pct+'%</b></span></div>'
+    ).join("");
+    $("tokSub").textContent = F(T.tok_sub, PH());
+  }
+
+  /* ---------- FAQ ---------- */
+  function renderFaq(){
+    $("faqList").innerHTML = (T.faq || []).map(f=>
+      '<div class="faq-item"><button class="faq-q" aria-expanded="false"><span>'+f.q+'</span><span class="chev">&#9662;</span></button>' +
+      '<div class="faq-a"><p>'+f.a+'</p></div></div>'
+    ).join("");
+    document.querySelectorAll(".faq-item").forEach(item=>{
+      const q = item.querySelector(".faq-q"), a = item.querySelector(".faq-a");
+      q.addEventListener("click", ()=>{
+        const open = item.classList.toggle("open");
+        q.setAttribute("aria-expanded", open);
+        a.style.maxHeight = open ? a.scrollHeight + "px" : "0px";
+      });
+    });
+  }
+
+  /* ---------- contract addresses ---------- */
+  function renderAddr(){
+    const labels = { token: T.addr_token, sale: T.addr_sale, fund: T.addr_fund, pair: T.addr_pair };
+    function shortAddr(a){ return a.slice(0,8) + "…" + a.slice(-6); }
+    $("addrList").innerHTML = Object.keys(labels).map(k=>{
+      const a = C[k];
+      if (!a) return '<div class="addr"><div><small>'+labels[k]+'</small><span class="muted">'+T.addr_tba+'</span></div></div>';
+      return '<div class="addr"><div><small>'+labels[k]+'</small><code title="'+a+'">'+shortAddr(a)+'</code></div>' +
+        '<div class="acts"><button class="icon-btn" data-copy="'+a+'">'+T.copy+'</button>' +
+        '<a class="icon-btn" href="'+CH.explorer+'/address/'+a+'" target="_blank" rel="noopener">BscScan &#8599;</a></div></div>';
+    }).join("");
+    document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click", ()=>{
+      navigator.clipboard.writeText(b.getAttribute("data-copy")).then(()=>toast(T.copied_addr, "ok"));
+    }));
+  }
+
+  /* ---------- countdown ---------- */
+  function tick(){
+    const now = Date.now();
+    const start = P.saleStartISO ? Date.parse(P.saleStartISO) : null;
+    const dead  = P.deadlineISO ? Date.parse(P.deadlineISO) : null;
+    let target = null, label = T.cd_none;
+    if (start && now < start){ target = start; label = T.cd_opens; }
+    else if (dead && now < dead){ target = dead; label = T.cd_deadline; }
+    else if (start || dead){ label = T.cd_done; }
+    $("cdLabel").textContent = label;
+    if (!target){ ["cdD","cdH","cdM","cdS"].forEach(id=>$(id).textContent="–"); return; }
+    let d = Math.max(0, Math.floor((target - now)/1000));
+    const dd = Math.floor(d/86400); d%=86400; const hh = Math.floor(d/3600); d%=3600;
+    $("cdD").textContent = dd; $("cdH").textContent = hh; $("cdM").textContent = Math.floor(d/60); $("cdS").textContent = d%60;
+  }
+
+  /* ---------- apply language ---------- */
+  function applyLang(){
+    T = S.i18n[LANG];
+    document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      const k = el.getAttribute("data-i18n"); if (T[k] !== undefined) el.textContent = T[k];
+    });
+    $("langEn").classList.toggle("sel", LANG === "en");
+    $("langZh").classList.toggle("sel", LANG === "zh");
+    $("taglineEl").textContent = T.tagline;
+    $("descriptionEl").textContent = T.description;
+    $("deskSub").textContent = F(T.desk_sub, PH());
+    $("buyPer").textContent = F(T.buy_per, { n: fmt(P.tokensPerShare) });
+    $("maxPer").textContent = F(T.max_per, { n: P.maxPaidPerWallet });
+    $("step1p").textContent = F(T.step1_p, { n: P.maxPaidPerWallet });
+    $("step2t").textContent = F(T.step2_t, PH());
+    $("step3p").textContent = F(T.step3_p, PH());
+    $("step4p").textContent = F(T.step4_p, PH());
+    $("inviteOut").placeholder = T.invite_ph;
+    if (!LIVE){
+      $("statusPillText").textContent = T.pill_preview;
+      $("deskTag").textContent = T.desk_tag_preview;
+      $("freeState").textContent = T.free_waiting;
+      $("collectState").textContent = T.collect_wait;
+      $("stFree").textContent = fmt(P.freeShares) + " " + T.mile_share;
+    } else {
+      $("statusPillText").textContent = T.pill_live_prefix + " " + CH.name;
+      $("deskTag").textContent = T.desk_tag_live;
+    }
+    renderMiles(); renderTerms(); renderMissions(); renderTok(); renderFaq(); renderAddr();
+    tick(); updBuy();
+    if (window.__nobRefresh) window.__nobRefresh();
+  }
+  function setLang(l){
+    if (l !== "en" && l !== "zh") return;
+    LANG = l;
+    try { localStorage.setItem("nob_lang", l); } catch(e){}
+    applyLang();
+  }
+  $("langEn").onclick = ()=>setLang("en");
+  $("langZh").onclick = ()=>setLang("zh");
+
+  /* ---------- initial status ---------- */
+  $("stPrice").textContent = P.pricePerShareBNB + " BNB";
+  if (!LIVE){
+    $("previewBanner").classList.add("on");
+    setProgress(0);
+  } else {
+    $("statusPill").classList.add("live");
+    $("deskTag").classList.add("on");
+  }
+
+  /* ---------- quantity: chips + stepper + slider ---------- */
+  function updBuy(){
+    $("qVal").textContent = qty; $("qRange").value = qty;
+    $("bdShares").textContent = qty;
+    $("bdTokens").textContent = fmt(qty * P.tokensPerShare) + " " + S.ticker;
+    $("bdTotal").textContent = (Math.round(qty * P.pricePerShareBNB * 1e6)/1e6) + " BNB";
+    document.querySelectorAll(".chip").forEach(ch=>{
+      const v = ch.getAttribute("data-q");
+      ch.classList.toggle("sel", v === "max" ? qty === P.maxPaidPerWallet : Number(v) === qty);
+    });
+  }
+  function setQty(v){ qty = Math.min(P.maxPaidPerWallet, Math.max(1, v|0)); updBuy(); }
+  $("qMinus").onclick = ()=>setQty(qty - 1);
+  $("qPlus").onclick  = ()=>setQty(qty + 1);
+  $("qRange").oninput = (e)=>setQty(Number(e.target.value));
+  document.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click", ()=>{
+    const v = ch.getAttribute("data-q");
+    setQty(v === "max" ? P.maxPaidPerWallet : Number(v));
+  }));
+
+  /* ---------- invite ---------- */
+  const inv = new URLSearchParams(location.search).get("invite");
+  $("copyInvite").onclick = ()=>{
+    const v = $("inviteOut").value;
+    if (!v){ toast(T.connect_first_invite); return; }
+    navigator.clipboard.writeText(v).then(()=>toast(T.copied_invite, "ok"));
+  };
+
+  applyLang();
+  if (inv) $("inviteNote").textContent = T.invite_came + " " + inv;
+  tick(); setInterval(tick, 1000);
+
+  if (!LIVE) return; // Preview mode: stop here, no chain calls.
+
+  /* ================= LIVE MODE ================= */
+  const SALE_ABI = [
+    "function freeSharesLeft() view returns (uint256)",
+    "function canClaimFree(address) view returns (bool)",
+    "function freeBooked(address) view returns (bool)",
+    "function bookedShares(address) view returns (uint256)",
+    "function refunded(address) view returns (bool)",
+    "function status() view returns (uint256,uint256,uint256,uint256,uint256)",
+    "function claimFreeShare()",
+    "function buyShares(uint256) payable",
+    "function collectShares()",
+    "function claimRefund()"
+  ];
+  const saleRead = new ethers.Contract(C.sale, SALE_ABI, new ethers.JsonRpcProvider(CH.rpc));
+  let poolOpen = false, saleFailed = false;
+
+  function setStatus(id, msg, cls){ const el = $(id); el.textContent = msg; el.className = "status-line" + (cls ? " " + cls : ""); }
+
+  async function refresh(){
+    try{ $("stFree").textContent = fmt(Number(await saleRead.freeSharesLeft())) + " " + T.mile_share; }catch(e){}
+    try{
+      const st = await saleRead.status();
+      const phase = Number(st[0]), sold = Number(st[2]);
+      setProgress(sold);
+      poolOpen = phase === 2;
+      saleFailed = phase === 3;
+      $("collectState").textContent = poolOpen ? T.collect_open : T.collect_wait;
+      $("refundRow").style.display = saleFailed ? "" : "none";
+    }catch(e){}
+    if (account){
+      try{
+        const can = await saleRead.canClaimFree(account);
+        const booked = await saleRead.bookedShares(account);
+        const freeB = await saleRead.freeBooked(account);
+        const ref = await saleRead.refunded(account);
+        $("stMine").textContent = fmt(Number(booked)) + " " + T.mile_share;
+        $("stMineSub").textContent = freeB ? T.hs_mine_free_yes : T.hs_mine_free_no;
+        $("freeState").textContent = freeB ? T.free_claimed : (can ? T.free_eligible : T.free_not);
+        $("claimBtn").disabled = !(can && !freeB);
+        $("refundBtn").disabled = !(saleFailed && booked > 0n && !ref);
+      }catch(e){}
+      $("buyBtn").disabled = false;
+      $("collectBtn").disabled = !poolOpen;
+    }
+  }
+  window.__nobRefresh = refresh;
+
+  async function getSaleWrite(){
+    const bp = new ethers.BrowserProvider(window.ethereum);
+    return new ethers.Contract(C.sale, SALE_ABI, await bp.getSigner());
+  }
+  async function runTx(id, btn, fn, okMsg){
+    try{
+      btn.disabled = true; setStatus(id, T.tx_wait_wallet, "muted");
+      const c = await getSaleWrite(); const tx = await fn(c);
+      setStatus(id, T.tx_sent, "muted");
+      await tx.wait();
+      setStatus(id, okMsg, "ok"); toast(okMsg, "ok");
+    }catch(e){ setStatus(id, T.tx_fail, "err"); toast(T.tx_fail, "err"); }
+    finally{ btn.disabled = false; refresh(); }
+  }
+
+  $("connectBtn").onclick = async ()=>{
+    if (!window.ethereum){ toast(T.no_wallet, "err"); return; }
+    try{
+      const accs = await window.ethereum.request({ method:"eth_requestAccounts" });
+      account = accs[0];
+      try{ await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x" + CH.id.toString(16) }] }); }catch(e){}
+      $("connectBtn").innerHTML = '<span class="wallet-dot"></span>' + account.slice(0,6) + "…" + account.slice(-4);
+      $("inviteOut").value = location.origin + location.pathname + "?invite=" + account;
+      toast(T.wallet_connected + " " + account.slice(0,6) + "…" + account.slice(-4), "ok");
+      await refresh();
+    }catch(e){ toast(T.wallet_fail, "err"); }
+  };
+  if (window.ethereum){
+    window.ethereum.on && window.ethereum.on("accountsChanged", ()=>location.reload());
+    window.ethereum.on && window.ethereum.on("chainChanged", ()=>location.reload());
+  }
+
+  $("claimBtn").onclick = (e)=>runTx("claimStatus", e.currentTarget, (c)=>c.claimFreeShare(), T.claim_ok);
+  $("buyBtn").onclick = (e)=>runTx("buyStatus", e.currentTarget, (c)=>c.buyShares(qty, { value: ethers.parseEther(String(Math.round(qty * P.pricePerShareBNB * 1e6)/1e6)) }), T.buy_ok);
+  $("collectBtn").onclick = (e)=>runTx("collectStatus", e.currentTarget, (c)=>c.collectShares(), T.collect_ok);
+  $("refundBtn").onclick = (e)=>runTx("refundStatus", e.currentTarget, (c)=>c.claimRefund(), T.refund_ok);
+
+  refresh();
+  setInterval(refresh, 30000);
+})();
+</script>
+</body>
+</html>
